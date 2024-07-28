@@ -6,6 +6,7 @@ use crate::println;
 lazy_static! {
     static ref IDT: InterruptDescriptorTable = {
         let mut idt = InterruptDescriptorTable::new();
+        idt.double_fault.set_handler_fn(double_fault_handler);
         idt.breakpoint.set_handler_fn(breakpoint_handler);
         idt
     };
@@ -15,11 +16,19 @@ pub fn init_idt() {
     IDT.load();
 }
 
+#[test_case]
+fn test_breakpoint_exception() {
+    x86_64::instructions::interrupts::int3();
+}
+
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
     println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
 }
 
-#[test_case]
-fn test_breakpoint_exception() {
-    x86_64::instructions::interrupts::int3();
+extern "x86-interrupt" fn double_fault_handler(
+    stack_frame: InterruptStackFrame,
+    _error_code: u64,
+) -> ! {
+    // error code is always 0
+    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
 }
