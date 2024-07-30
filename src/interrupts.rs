@@ -1,4 +1,4 @@
-use crate::{gdt, print, println};
+use crate::{gdt, print, println, scancode};
 use core::u8;
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
@@ -9,6 +9,7 @@ use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 #[repr(u8)]
 pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
+    Keyboard,
 }
 
 impl InterruptIndex {
@@ -37,6 +38,8 @@ lazy_static! {
         }
         idt.breakpoint.set_handler_fn(breakpoint_handler);
         idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
+        idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
+
         idt
     };
 }
@@ -63,9 +66,28 @@ extern "x86-interrupt" fn double_fault_handler(
 }
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    print!(".");
     unsafe {
         PICS.lock()
             .notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
+    }
+}
+
+extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    use x86_64::instructions::port::Port;
+
+    let mut port = Port::new(0x60);
+    let scancode: u8 = unsafe { port.read() };
+    match scancode::interpret(scancode) {
+        Ok(interp) => {
+            if interp.0 {
+                print!("{}", interp.1);
+            }
+        }
+        Err(masked_scancode) => println!("failed to interpet {}", masked_scancode),
+    }
+
+    unsafe {
+        PICS.lock()
+            .notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
     }
 }
