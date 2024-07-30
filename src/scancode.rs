@@ -17,10 +17,12 @@ pub fn interpret(raw_scancode: u8) -> Result<(bool, char), u8> {
     }
 
     match scancode {
+        1 => Ok((is_pressed, '\0')), // ESC
+        // digits
         12 => Ok((is_pressed, '-')),
         13 => Ok((is_pressed, '=')),
+        14 => Ok((is_pressed, '\0')), // BACKSPACE
         15 => Ok((is_pressed, '\t')),
-
         16 => Ok((is_pressed, 'q')),
         17 => Ok((is_pressed, 'w')),
         18 => Ok((is_pressed, 'e')),
@@ -34,7 +36,7 @@ pub fn interpret(raw_scancode: u8) -> Result<(bool, char), u8> {
         26 => Ok((is_pressed, '[')),
         27 => Ok((is_pressed, ']')),
         28 => Ok((is_pressed, '\n')),
-
+        29 => Ok((is_pressed, '\0')), // L_CTRL
         30 => Ok((is_pressed, 'a')),
         31 => Ok((is_pressed, 's')),
         32 => Ok((is_pressed, 'd')),
@@ -44,7 +46,11 @@ pub fn interpret(raw_scancode: u8) -> Result<(bool, char), u8> {
         36 => Ok((is_pressed, 'j')),
         37 => Ok((is_pressed, 'k')),
         38 => Ok((is_pressed, 'l')),
-
+        39 => Ok((is_pressed, ';')),
+        40 => Ok((is_pressed, '\'')),
+        41 => Ok((is_pressed, '~')),
+        42 => Ok((is_pressed, '\0')), // L_SHIFT
+        43 => Ok((is_pressed, '\\')),
         44 => Ok((is_pressed, 'z')),
         45 => Ok((is_pressed, 'x')),
         46 => Ok((is_pressed, 'c')),
@@ -55,7 +61,9 @@ pub fn interpret(raw_scancode: u8) -> Result<(bool, char), u8> {
         51 => Ok((is_pressed, ',')),
         52 => Ok((is_pressed, '.')),
         53 => Ok((is_pressed, '/')),
-
+        54 => Ok((is_pressed, '\0')), // R_SHIFT
+        55 => Ok((is_pressed, '\0')), // printscreen
+        56 => Ok((is_pressed, '\0')), // L_ALT
         57 => Ok((is_pressed, ' ')),
 
         _ => Err(scancode),
