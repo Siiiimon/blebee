@@ -11,7 +11,7 @@ use core::panic::PanicInfo;
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    blebee::hlt_loop();
 }
 
 #[cfg(test)]
@@ -31,5 +31,5 @@ pub extern "C" fn _start() -> ! {
 
     println!("no crash yippie!");
 
-    loop {}
+    blebee::hlt_loop();
 }
